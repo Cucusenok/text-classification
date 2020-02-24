@@ -1,28 +1,41 @@
-# Импортируем библиотеки
-from sklearn import datasets
-import matplotlib.pyplot as plt
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import SGDClassifier
+from sklearn.pipeline import Pipeline
+from classes.helpers.File import File
+from classes.nlp.WordTokenaizer import RussianWordTokenaizer
+import os
+import collections
 
-# Загружаем набор данных
-iris_df = datasets.load_iris()
 
-# Методы, доступные для набора данных
-print(dir(iris_df))
 
-# Признаки
-print(iris_df.feature_names)
 
-# Метки
-print(iris_df.target)
 
-# Имена меток
-print(iris_df.target_names)
 
-# Разделение набора данных
-x_axis = iris_df.data[:, 0]  # Sepal Length
-y_axis = iris_df.data[:, 1]  # Sepal Width
+files = os.listdir('data/russian/posts/')
 
-# Построение
-plt.xlabel(iris_df.feature_names[0])
-plt.ylabel(iris_df.feature_names[1])
-plt.scatter(x_axis, y_axis, c=iris_df.target)
-plt.show()
+fileNames = [x.split('.')[0] for x in files ]
+
+text1 = File("data/russian/posts/oop.txt").getContent()
+text2 = File("data/russian/posts/ci_di.txt").getContent()
+text3 = File("data/russian/posts/yandex.txt").getContent()
+
+
+testText = File("data/russian/posts/oop_test.txt").getContent()
+
+russianTextTokenaizer = RussianWordTokenaizer(testText).make()
+
+texts = [text1, text2]
+texts_labels = ['oop', 'ci/di']
+ 
+text_clf = Pipeline([
+                     ('tfidf', TfidfVectorizer()),
+                     ('clf', SGDClassifier())
+                     ])
+ 
+text_clf.fit(texts, texts_labels)
+ 
+
+res = (text_clf.predict(russianTextTokenaizer))
+print(collections.Counter(res))
+#print(res)
